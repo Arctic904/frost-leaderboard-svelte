@@ -1,14 +1,16 @@
 import { relations, sql } from 'drizzle-orm';
 import {
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	bigint,
+	tinyint,
+	datetime,
 	index,
 	int,
 	mysqlTableCreator,
 	primaryKey,
 	text,
 	timestamp,
-	varchar
+	varchar,
+	smallint,
+	double
 } from 'drizzle-orm/mysql-core';
 import type { AdapterAccount } from '@auth/core/adapters';
 
@@ -85,5 +87,38 @@ export const verificationTokens = mysqlTable(
 	},
 	(vt) => ({
 		compoundKey: primaryKey(vt.identifier, vt.token)
+	})
+);
+
+export const games = mysqlTable(
+	'games',
+	{
+		playerId: varchar('playerId', { length: 255 }).notNull(),
+		matchId: varchar('matchId', { length: 255 }).notNull(),
+		teamId: varchar('teamId', { length: 255 }).notNull(),
+		tournamentId: varchar('tournamentId', { length: 255 }).notNull(),
+		kills: tinyint('kills').notNull(),
+		assists: tinyint('assists').notNull(),
+		deaths: tinyint('deaths').notNull(),
+		damage: smallint('damage').notNull(),
+		headshots: double('headshots', { precision: 2 }).notNull(),
+		matchTime: datetime('matchTime').notNull()
+	},
+	(games) => ({
+		compoundKey: primaryKey(games.playerId, games.matchId)
+	})
+);
+
+export const matches = mysqlTable(
+	'matches',
+	{
+		matchId: varchar('matchId', { length: 255 }).notNull(),
+		topTeamId: varchar('teamId', { length: 255 }).notNull(),
+		bottomTeamId: varchar('teamId', { length: 255 }).notNull(),
+		tournamentId: varchar('tournamentId', { length: 255 }).notNull(),
+		matchTime: datetime('matchTime').notNull()
+	},
+	(matches) => ({
+		compoundKey: primaryKey(matches.matchId, matches.tournamentId)
 	})
 );
