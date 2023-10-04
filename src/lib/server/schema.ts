@@ -9,7 +9,6 @@ import {
 	text,
 	timestamp,
 	varchar,
-	smallint,
 	double
 } from 'drizzle-orm/mysql-core';
 import type { AdapterAccount } from '@auth/core/adapters';
@@ -90,35 +89,148 @@ export const verificationTokens = mysqlTable(
 	})
 );
 
-export const games = mysqlTable(
-	'games',
+export const player = mysqlTable(
+	'player',
 	{
-		playerId: varchar('playerId', { length: 255 }).notNull(),
-		matchId: varchar('matchId', { length: 255 }).notNull(),
-		teamId: varchar('teamId', { length: 255 }).notNull(),
-		tournamentId: varchar('tournamentId', { length: 255 }).notNull(),
-		kills: tinyint('kills').notNull(),
-		assists: tinyint('assists').notNull(),
-		deaths: tinyint('deaths').notNull(),
-		damage: smallint('damage').notNull(),
-		headshots: double('headshots', { precision: 2 }).notNull(),
-		matchTime: datetime('matchTime').notNull()
+		id: int('id').notNull().primaryKey(),
+		name: varchar('name', { length: 255 }).notNull(),
+		linked_user_id: int('linked_user_id').notNull(),
+		battlefy_id: varchar('battlefy_id', { length: 32 }).notNull(),
+		created_at: datetime('created_at')
+			.notNull()
+			.default(sql`CURRENT_TIMESTAMP`),
+		updated_at: datetime('updated_at')
+			.notNull()
+			.default(sql`CURRENT_TIMESTAMP`)
 	},
-	(games) => ({
-		compoundKey: primaryKey(games.playerId, games.matchId)
+	(player) => ({
+		nameIdx: index('name_idx').on(player.name)
 	})
 );
 
-export const matches = mysqlTable(
-	'matches',
+export const playerRelations = relations(player, ({ one }) => ({
+	user: one(users, { fields: [player.linked_user_id], references: [users.id] })
+}));
+
+export const team = mysqlTable(
+	'team',
 	{
-		matchId: varchar('matchId', { length: 255 }).notNull(),
-		topTeamId: varchar('teamId', { length: 255 }).notNull(),
-		bottomTeamId: varchar('teamId', { length: 255 }).notNull(),
-		tournamentId: varchar('tournamentId', { length: 255 }).notNull(),
-		matchTime: datetime('matchTime').notNull()
+		id: int('id').notNull().primaryKey(),
+		name: varchar('name', { length: 255 }).notNull(),
+		battlefy_id: varchar('battlefy_id', { length: 32 }).notNull(),
+		created_at: datetime('created_at')
+			.notNull()
+			.default(sql`CURRENT_TIMESTAMP`),
+		updated_at: datetime('updated_at')
+			.notNull()
+			.default(sql`CURRENT_TIMESTAMP`)
 	},
-	(matches) => ({
-		compoundKey: primaryKey(matches.matchId, matches.tournamentId)
+	(team) => ({
+		nameIdx: index('name_idx').on(team.name)
 	})
 );
+
+export const tournament = mysqlTable(
+	'tournament',
+	{
+		id: int('id').notNull().primaryKey(),
+		name: varchar('name', { length: 255 }).notNull(),
+		battlefy_id: varchar('battlefy_id', { length: 32 }).notNull(),
+		created_at: datetime('created_at')
+			.notNull()
+			.default(sql`CURRENT_TIMESTAMP`),
+		teams: int('teams').notNull(),
+		players: int('players').notNull()
+	},
+	(tournament) => ({
+		nameIdx: index('name_idx').on(tournament.name)
+	})
+);
+
+export const match = mysqlTable(
+	'match',
+	{
+		id: int('id').notNull().primaryKey(),
+		created_at: datetime('created_at')
+			.notNull()
+			.default(sql`CURRENT_TIMESTAMP`),
+		updated_at: datetime('updated_at')
+			.notNull()
+			.default(sql`CURRENT_TIMESTAMP`),
+		team1: int('team1').notNull(),
+		team2: int('team2').notNull(),
+		team1_score: tinyint('team1_score').notNull(),
+		team2_score: tinyint('team2_score').notNull(),
+		winner: int('winner').notNull(),
+		tournament_id: int('tournament_id').notNull()
+	},
+	(match) => ({
+		team1Idx: index('team1_idx').on(match.team1),
+		team2Idx: index('team2_idx').on(match.team2),
+		tournamentIdx: index('tournament_idx').on(match.tournament_id)
+	})
+);
+
+export const matchRelations = relations(match, ({ one }) => ({
+	tournament: one(tournament, { fields: [match.tournament_id], references: [tournament.id] })
+}));
+
+export const game = mysqlTable(
+	'game',
+	{
+		id: int('id').notNull().primaryKey(),
+		created_at: datetime('created_at')
+			.notNull()
+			.default(sql`CURRENT_TIMESTAMP`),
+		updated_at: datetime('updated_at')
+			.notNull()
+			.default(sql`CURRENT_TIMESTAMP`),
+		match_id: int('match_id').notNull(),
+		team1: int('team1').notNull(),
+		team2: int('team2').notNull(),
+		team1_score: tinyint('team1_score').notNull(),
+		team2_score: tinyint('team2_score').notNull(),
+		winner: int('winner').notNull()
+	},
+	(game) => ({
+		matchIdx: index('match_idx').on(game.match_id),
+		team1Idx: index('team1_idx').on(game.team1),
+		team2Idx: index('team2_idx').on(game.team2)
+	})
+);
+
+export const gameRelations = relations(game, ({ one }) => ({
+	match: one(match, { fields: [game.match_id], references: [match.id] })
+}));
+
+export const statline = mysqlTable(
+	'statline',
+	{
+		game_id: int('game_id').notNull(),
+		player_id: int('player_id').notNull(),
+		team_id: int('team_id').notNull(),
+		kills: tinyint('kills').notNull(),
+		deaths: tinyint('deaths').notNull(),
+		assists: tinyint('assists').notNull(),
+		kda: double('kda').notNull(),
+		headshot_percentage: double('headshot_percentage').notNull(),
+		created_at: datetime('created_at')
+			.notNull()
+			.default(sql`CURRENT_TIMESTAMP`),
+		updated_at: datetime('updated_at')
+			.notNull()
+			.default(sql`CURRENT_TIMESTAMP`)
+	},
+	(statline) => ({
+		compoundKey: primaryKey(statline.game_id, statline.player_id),
+		gameIdx: index('game_idx').on(statline.game_id),
+		playerIdx: index('player_idx').on(statline.player_id),
+		teamIdx: index('team_idx').on(statline.team_id)
+	})
+);
+
+export const statlineRelations = relations(statline, ({ one }) => ({
+	game: one(game, { fields: [statline.game_id], references: [game.id] }),
+	player: one(player, { fields: [statline.player_id], references: [player.id] }),
+	team: one(team, { fields: [statline.team_id], references: [team.id] })
+}));

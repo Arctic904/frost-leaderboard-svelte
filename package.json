@@ -14,7 +14,8 @@
 		"test:integration": "playwright test",
 		"test:unit": "vitest",
 		"db:push": "nodemon --exec \"pnpm drizzle-kit push:mysql\" --watch src/lib/server/schema.ts",
-		"local": "run-p dev db:push"
+		"local": "run-p dev db:push",
+		"studio": "drizzle-kit studio --port 3001"
 	},
 	"devDependencies": {
 		"@playwright/test": "^1.28.1",
@@ -53,6 +54,7 @@
 		"lucide-svelte": "^0.279.0",
 		"mysql2": "^3.6.1",
 		"tailwind-merge": "^1.14.0",
-		"tailwind-variants": "^0.1.14"
+		"tailwind-variants": "^0.1.14",
+		"zod": "^3.22.3"
 	}
 }
