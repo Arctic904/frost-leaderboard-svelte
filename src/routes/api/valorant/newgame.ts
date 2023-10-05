@@ -1,4 +1,4 @@
-import * as db from '$lib/server/schema';
+// import { db } from '$lib/server';
 import { z } from 'zod';
 
 import type { RequestHandler } from '@sveltejs/kit';
@@ -19,12 +19,14 @@ export const POST: RequestHandler = async ({ request }) => {
 			.then((data) => {
 				return data;
 			});
+		console.log(gamedata);
 	} catch (e: unknown) {
 		if (e instanceof Error) {
 			return new Response(e.message, { status: 500 });
 		}
 		return new Response('Unknown error', { status: 500 });
 	}
+	return new Response('OK', { status: 200 });
 };
 
 export const TeamEnumSchema = z.enum(['Blue', 'Red']);
