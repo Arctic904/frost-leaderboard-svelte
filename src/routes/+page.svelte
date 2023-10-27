@@ -1,6 +1,7 @@
-<script>
+<script lang="ts">
 	import { signIn, signOut } from '@auth/sveltekit/client';
 	import { page } from '$app/stores';
+	let response: Response | null = null;
 </script>
 
 <h1>SvelteKit Auth Example</h1>
@@ -19,3 +20,19 @@
 		<button on:click={() => signIn()}>Sign In with GitHub</button>
 	{/if}
 </p>
+
+<button
+	on:click={async () => {
+		response = await fetch('/api/valorant/newgame', {
+			method: 'POST',
+			body: JSON.stringify({ bracket_id: '651232ec179a4431b3c7466b' }),
+			headers: {
+				'Content-Type': 'application/json'
+			}
+		});
+	}}>Test Submit</button
+>
+
+{#if response}
+	<p>{JSON.stringify(response)}</p>
+{/if}

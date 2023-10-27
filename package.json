@@ -13,8 +13,9 @@
 		"format": "prettier --plugin-search-dir . --write .",
 		"test:integration": "playwright test",
 		"test:unit": "vitest",
+		"db": "pnpm drizzle-kit push:mysql",
 		"db:push": "nodemon --exec \"pnpm drizzle-kit push:mysql\" --watch src/lib/server/schema.ts",
-		"local": "run-p dev db:push",
+		"local": "run-p studio db:push",
 		"studio": "drizzle-kit studio --port 3001"
 	},
 	"devDependencies": {
@@ -44,9 +45,9 @@
 	},
 	"type": "module",
 	"dependencies": {
-		"@auth/core": "^0.16.0",
-		"@auth/drizzle-adapter": "^0.3.2",
-		"@auth/sveltekit": "^0.3.7",
+		"@auth/core": "^0.16.1",
+		"@auth/drizzle-adapter": "^0.3.3",
+		"@auth/sveltekit": "^0.3.9",
 		"@planetscale/database": "^1.11.0",
 		"clsx": "^2.0.0",
 		"dotenv": "^16.3.1",

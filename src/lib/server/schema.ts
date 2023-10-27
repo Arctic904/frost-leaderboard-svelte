@@ -92,10 +92,9 @@ export const verificationTokens = mysqlTable(
 export const player = mysqlTable(
 	'player',
 	{
-		id: int('id').notNull().primaryKey(),
+		id: varchar('id', { length: 24 }).notNull().primaryKey(),
 		name: varchar('name', { length: 255 }).notNull(),
-		linked_user_id: int('linked_user_id').notNull(),
-		battlefy_id: varchar('battlefy_id', { length: 32 }).notNull(),
+		linked_user_id: varchar('linked_user_id', { length: 78 }).notNull(),
 		created_at: datetime('created_at')
 			.notNull()
 			.default(sql`CURRENT_TIMESTAMP`),
@@ -104,20 +103,16 @@ export const player = mysqlTable(
 			.default(sql`CURRENT_TIMESTAMP`)
 	},
 	(player) => ({
-		nameIdx: index('name_idx').on(player.name)
+		nameIdx: index('name_idx').on(player.name),
+		linkedUserIdIdx: index('linked_user_id_idx').on(player.linked_user_id)
 	})
 );
-
-export const playerRelations = relations(player, ({ one }) => ({
-	user: one(users, { fields: [player.linked_user_id], references: [users.id] })
-}));
 
 export const team = mysqlTable(
 	'team',
 	{
-		id: int('id').notNull().primaryKey(),
+		battlefy_id: varchar('battlefy_id', { length: 24 }).notNull().primaryKey(),
 		name: varchar('name', { length: 255 }).notNull(),
-		battlefy_id: varchar('battlefy_id', { length: 32 }).notNull(),
 		created_at: datetime('created_at')
 			.notNull()
 			.default(sql`CURRENT_TIMESTAMP`),
@@ -133,9 +128,8 @@ export const team = mysqlTable(
 export const tournament = mysqlTable(
 	'tournament',
 	{
-		id: int('id').notNull().primaryKey(),
+		id: varchar('id', { length: 24 }).notNull().primaryKey(),
 		name: varchar('name', { length: 255 }).notNull(),
-		battlefy_id: varchar('battlefy_id', { length: 32 }).notNull(),
 		created_at: datetime('created_at')
 			.notNull()
 			.default(sql`CURRENT_TIMESTAMP`),
@@ -150,19 +144,19 @@ export const tournament = mysqlTable(
 export const match = mysqlTable(
 	'match',
 	{
-		id: int('id').notNull().primaryKey(),
+		id: varchar('id', { length: 24 }).notNull().primaryKey(),
+		tournament_id: varchar('tournament_id', { length: 24 }).notNull(),
 		created_at: datetime('created_at')
 			.notNull()
 			.default(sql`CURRENT_TIMESTAMP`),
 		updated_at: datetime('updated_at')
 			.notNull()
 			.default(sql`CURRENT_TIMESTAMP`),
-		team1: int('team1').notNull(),
-		team2: int('team2').notNull(),
+		team1: varchar('team1', { length: 24 }).notNull(),
+		team2: varchar('team2', { length: 24 }).notNull(),
 		team1_score: tinyint('team1_score').notNull(),
 		team2_score: tinyint('team2_score').notNull(),
-		winner: int('winner').notNull(),
-		tournament_id: int('tournament_id').notNull()
+		winner: varchar('winner', { length: 24 }).notNull()
 	},
 	(match) => ({
 		team1Idx: index('team1_idx').on(match.team1),
@@ -178,19 +172,19 @@ export const matchRelations = relations(match, ({ one }) => ({
 export const game = mysqlTable(
 	'game',
 	{
-		id: int('id').notNull().primaryKey(),
+		id: varchar('id', { length: 32 }).notNull().primaryKey(),
 		created_at: datetime('created_at')
 			.notNull()
 			.default(sql`CURRENT_TIMESTAMP`),
 		updated_at: datetime('updated_at')
 			.notNull()
 			.default(sql`CURRENT_TIMESTAMP`),
-		match_id: int('match_id').notNull(),
-		team1: int('team1').notNull(),
-		team2: int('team2').notNull(),
+		match_id: varchar('match_id', { length: 24 }).notNull(),
+		team1: varchar('team1', { length: 24 }).notNull(),
+		team2: varchar('team2', { length: 24 }).notNull(),
 		team1_score: tinyint('team1_score').notNull(),
 		team2_score: tinyint('team2_score').notNull(),
-		winner: int('winner').notNull()
+		winner: varchar('winner', { length: 24 }).notNull()
 	},
 	(game) => ({
 		matchIdx: index('match_idx').on(game.match_id),
@@ -206,9 +200,9 @@ export const gameRelations = relations(game, ({ one }) => ({
 export const statline = mysqlTable(
 	'statline',
 	{
-		game_id: int('game_id').notNull(),
-		player_id: int('player_id').notNull(),
-		team_id: int('team_id').notNull(),
+		game_id: varchar('game_id', { length: 24 }).notNull(),
+		player_id: varchar('player_id', { length: 24 }).notNull(),
+		team_id: varchar('team_id', { length: 24 }).notNull(),
 		kills: tinyint('kills').notNull(),
 		deaths: tinyint('deaths').notNull(),
 		assists: tinyint('assists').notNull(),
