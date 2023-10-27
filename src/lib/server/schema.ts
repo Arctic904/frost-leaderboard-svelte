@@ -226,5 +226,5 @@ export const statline = mysqlTable(
 export const statlineRelations = relations(statline, ({ one }) => ({
 	game: one(game, { fields: [statline.game_id], references: [game.id] }),
 	player: one(player, { fields: [statline.player_id], references: [player.id] }),
-	team: one(team, { fields: [statline.team_id], references: [team.id] })
+	team: one(team, { fields: [statline.team_id], references: [team.battlefy_id] })
 }));
